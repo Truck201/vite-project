@@ -1,0 +1,23 @@
+{
+  "name": "vite-project",
+  "description": "Space Invasion, in Phaser",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "proxy": 8080,
+  "author": "Gandini J.A.",
+  "license": "MIT",
+  "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "lts": "^2.0.0",
+    "phaser": "^3.88.2"
+  }
+}
