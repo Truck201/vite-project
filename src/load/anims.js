@@ -79,6 +79,24 @@ export function initialAnimations(scene) {
       repeat: -1,
     });
 
-    console.log("Starts anims");
+    scene.anims.create({
+      key: "boss-idle",
+      frames: scene.anims.generateFrameNumbers("bossIdle", {
+        start: 0,
+        end: 1,
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
+
+    scene.anims.create({
+      key: "ballAnim",
+      frames: scene.anims.generateFrameNumbers("ball-anim", {
+        start: 0,
+        end: 2,
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
   }
 }

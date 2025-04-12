@@ -8,12 +8,12 @@ export class Preload extends Scene {
   preload() {
     this.load.image(
       "asteroid",
-      "../public/assets/background/parallax/asteroids.png"
+      "../public/assets/background/parallax/asteroids-1.png"
     );
 
     this.load.image(
       "background",
-      "../public/assets/background/parallax/stars.png"
+      "../public/assets/background/parallax/stars-1.png"
     );
 
     this.load.spritesheet(
@@ -31,11 +31,6 @@ export class Preload extends Scene {
       "explosion",
       "../public/assets/Invasors/sprites/explosion.png"
     );
-
-    // this.load.image(
-    //   "bossSprite",
-    //   "../public/assets/Invasors/sprites/boss.png"
-    // );
 
     this.load.spritesheet(
       "ship",
@@ -103,17 +98,36 @@ export class Preload extends Scene {
       }
     );
 
-    // this.load.spritesheet(
-    //   "bossIdle",
-    //   "../public/assets/Invasors/spritesheet/bossIdle.png",
-    //   {
-    //     frameWidth: 18,
-    //     frameHeight: 9,
-    //   }
-    // );
+    // Boss
+
+    this.load.image("boss", "../public/assets/Invasors/sprites/boss.png");
+
+    this.load.spritesheet(
+      "bossIdle",
+      "../public/assets/Invasors/spritesheet/boss-idle.png",
+      {
+        frameWidth: 32,
+        frameHeight: 18,
+      }
+    );
+
+    // shoot
+    this.load.image(
+      "ballsprite",
+      "../public/assets/Invasors/sprites/boss-ball.png"
+    );
+
+    this.load.spritesheet(
+      "ball-anim",
+      "../public/assets/Invasors/spritesheet/boss-ball.png",
+      {
+        frameWidth: 16,
+        frameHeight: 14,
+      }
+    );
   }
 
   create() {
-    this.scene.start("game");
+    this.scene.start("main-menu");
   }
 }

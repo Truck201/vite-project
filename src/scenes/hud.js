@@ -1,6 +1,7 @@
 import { Scene } from "phaser";
 
 export class Hud extends Scene {
+  level = 0;
   constructor() {
     super("hud");
   }
@@ -39,6 +40,26 @@ export class Hud extends Scene {
       })
       .setOrigin(0.5)
       .setDepth(40);
+
+    this.levelText = this.add
+      .text(x * 0.2, y * 0.93, `Level 1`, {
+        fontSize: "9px",
+        fontFamily: "'Press Start 2P'",
+        fill: "#00f",
+      })
+      .setOrigin(0.5)
+      .setDepth(20);
+
+    this.tweens.add({
+      targets: this.levelText,
+      alpha: 0,
+      duration: 1500,
+      ease: "Power2",
+      delay: 1500,
+      onComplete: () => {
+        this.levelText.setAlpha(0); // Lo "oculta" pero no lo destruye
+      },
+    });
   }
 
   update_points(points) {
@@ -48,7 +69,12 @@ export class Hud extends Scene {
     );
   }
 
-  getHitPoints() {
+  get_level() {
+    console.log("chango");
+    return this.level;
+  }
+
+  damage_player() {
     this.playerHP--;
     return this.playerHP;
   }
@@ -70,6 +96,35 @@ export class Hud extends Scene {
         this.scene.stop("game");
         this.scene.start("Boot");
         location.reload();
+      });
+    }
+  }
+
+  update_level(isBossLevel) {
+    console.log(`Level actual ${this.level}`);
+    this.level++;
+
+    console.log(this.level, isBossLevel);
+    console.log(this.levelText);
+    if (this.levelText) {
+      this.levelText.setAlpha(1); // Reinicia visibilidads
+
+      if (isBossLevel) {
+        this.levelText.setText("¡Jefe!");
+      } else if (!isBossLevel) {
+        this.levelText.setText(`Nivel ${this.level}`);
+      }
+      // Animación de aparición del nuevo nivel
+
+      this.tweens.add({
+        targets: this.levelText,
+        alpha: 0,
+        duration: 1500,
+        ease: "Power2",
+        delay: 1500,
+        onComplete: () => {
+          this.levelText.setAlpha(0); // Lo "oculta" pero no lo destruye
+        },
       });
     }
   }

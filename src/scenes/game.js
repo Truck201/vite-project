@@ -1,9 +1,9 @@
 import { Scene } from "phaser";
 import { initialAnimations } from "../load/anims";
-import { Addenemies, setupEnemyBullets } from "../load/aliens";
-import { createBulletSystem, updateBullets } from "../entititie/bullet";
-import { addBonus } from "../load/bonus";
-import { spawnBoss } from "../load/boss";
+import { Player } from "../entititie/player";
+import { EnemyManager } from "../entititie/EnemyManager";
+import { addBonus } from "../entititie/bonus";
+import { InputManager } from "../component/imputManager";
 
 export class Game extends Scene {
   constructor() {
@@ -13,39 +13,13 @@ export class Game extends Scene {
   points = 0;
   game_over_timeout;
   time_event;
-  playerIsMoving = false;
-  currentDirection = null;
-  playerHP = 3;
-  hasWon = false;
 
   init(data) {
-    //Points
     this.points = data.points || 0;
-    this.game_over_timeout = 40;
-
-    this.scene.launch("hud", {
-      points: this.points,
-      playerHP: this.playerHP,
-    });
   }
 
   create() {
-    const x = this.scale.width;
-    const y = this.scale.height;
-
-    this.currentLevel = 1;
-    this.isBossLevel = false;
-
     initialAnimations(this);
-
-    // Añadir bonus
-    this.time.addEvent({
-      delay: Phaser.Math.Between(7000, 13000),
-      loop: true,
-      callback: () => {
-        this.bonus = new addBonus(this);
-      },
-    });
 
     // fondo
     this.asteroids = this.add
@@ -79,193 +53,84 @@ export class Game extends Scene {
       },
     ];
 
-    // add player
-    this.player = this.physics.add
-      .sprite(x * 0.5, y * 0.82, "ship")
-      .setOffset(0.5);
+    this.inputManager = new InputManager(this);
+    this.inputManager.setup();
 
-    this.player.body.setAllowGravity(false);
+    // añadimos Player
+    this.player = new Player(this);
 
-    this.player.setCollideWorldBounds(true).setDepth(8);
+    // Hud
+    this.scene.launch("hud", {
+      points: this.points,
+      playerHP: this.player.playerHP,
+    });
 
-    this.player.anims.play("idle", true);
+    // añadimos Enemigos
+    this.enemyManager = new EnemyManager(this);
+    this.enemyManager.startLevel();
 
-    this.flares = this.add.sprite(this.player.x, 180, "flar");
-    this.physics.add.existing(this.flares);
-    this.flares.setImmovable;
-    this.flares.setOrigin(0.5);
-    this.flares.body.allowGravity = false;
-    this.flares.play("flaires", true);
+    this.player.createBulletSystem(this);
 
-    this.startLevel(1);
+    // Añadir bonus
+    this.time.addEvent({
+      delay: Phaser.Math.Between(1000, 2000),
+      loop: true,
+      callback: () => {
+        if (!this.bonus || !this.bonus.isAlive()) {
+          this.bonus = new addBonus(this);
+        }
+      },
+    });
 
-    if (this.enemyBullets && this.player) {
-      this.physics.add.overlap(
-        this.enemyBullets,
-        this.player,
-        this.handlePlayerHit,
-        null,
-        this
-      );
-    }
+    // Balas enemigas vs player
+    this.physics.add.overlap(
+      this.enemyBullets, // Grupo de balas enemigas
+      this.player.player, // Sprite del jugador
+      this.player.handlePlayerHit.bind(this.player), // Método de colisión
+      null,
+      this // Contexto de la escena
+    );
 
-    if (this.enemies && this.player) {
-      this.physics.add.overlap(
-        this.enemies,
-        this.player,
-        this.handlePlayerHit,
-        null,
-        this
-      );
-    }
-
-    //Agregar los cursores
-    this.cursor = this.input.keyboard.createCursorKeys();
+    // Enemigos vs player
+    this.physics.add.overlap(
+      this.enemies,
+      this.player.player,
+      this.player.handlePlayerHit.bind(this.player),
+      null,
+      this
+    );
   }
 
   update() {
-    this.moveParallax();
-    this.playerMove(88);
-    updateBullets(this, this.time.now);
+    // Joysticks?
+    this.inputManager.update(); // actualiza estado del joystick
 
-    if (
-      (this.bonusAlien && this.bonusAlien.x > this.scale.width + 80) ||
-      (this.bonusAlien && this.bonusAlien.x < -80)
-    ) {
-      this.bonusAlien.destroy();
-      this.bonusAlien = null;
-    }
-    if (this.flares) {
-      this.flares.x = this.player.x;
-      this.flares.y = this.player.y + 10.5; // ajustá el valor si necesitás que esté debajo
-    }
+    const movement = this.inputManager.getMovement();
+    const isShooting = this.inputManager.isShooting();
 
-    if (
-      !this.isBossLevel &&
-      this.enemies &&
-      this.enemies.countActive(true) === 0
-    ) {
-      this.time.delayedCall(1000, () => {
-        this.startLevel(this.currentLevel + 1);
-      });
-    }
-  }
-
-  hitBonusAlien(bullet, bonus) {
-    bullet.destroy();
-    bonus.destroy();
-
-    let explotion = this.add
-      .sprite(bonus.x, bonus.y, "explosion")
-      .setDepth(20)
-      .setScale(2);
-
-    this.time.addEvent({
-      delay: 100,
-      callback: () => {
-        explotion.destroy();
-      },
-    });
-
-    // Mostrar texto de puntos
-    const text = this.add
-      .text(bonus.x, bonus.y, "+500", {
-        fontSize: "16px",
-        fill: "#ffff00",
-        stroke: "#000",
-        strokeThickness: 4,
-      })
-      .setOrigin(0.5);
-
-    this.tweens.add({
-      targets: text,
-      y: bonus.y - 40,
-      alpha: 0,
-      duration: 800,
-      ease: "Power2",
-      onComplete: () => text.destroy(),
-    });
-
-    this.scene.get("hud").update_points(500);
-  }
-
-  startLevel(level) {
-    this.currentLevel = level;
-    this.isBossLevel = level % 2 === 0; // Nivel par → jefe
-
-    if (this.enemies) {
-      this.enemies.clear(true, true);
-    }
-
-    if (this.boss) {
-      this.boss.destroy();
-      this.boss = null;
-    }
-
-    if (this.enemyBullets) {
-      this.enemyBullets.clear(true, true);
-    }
-
-    if (this.isBossLevel) {
-      spawnBoss(this);
+    if (this.inputManager.pad) {
+      this.player.playerMove(movement.x * 88); // joystick
+      if (isShooting) this.player.shootBullet();
     } else {
-      const x = this.scale.width * 0.5;
-      const y = this.scale.height * 0.5;
-
-      Addenemies(this, x, y, "skull");
-      Addenemies(this, x, y, "octopus");
-      Addenemies(this, x, y, "marciano");
-
-      createBulletSystem(this);
-      setupEnemyBullets(this);
+      this.player.playerMove(88); // teclado
     }
-  }
 
-  playerMove(speed) {
-    if (this.cursor.left.isDown && this.currentDirection !== "left") {
-      this.player.body.setVelocityX(-speed);
+    // Config Default
+    this.moveParallax();
+    this.player.playerMove(88);
+    this.player.update();
+    this.player.updateBullets(this, this.time.now);
 
-      if (!this.playerIsMoving) {
-        this.player.anims.play("left", true);
-        this.playerIsMoving = true;
-        this.currentDirection = "left";
-      }
-    } else if (this.cursor.right.isDown && this.currentDirection !== "right") {
-      this.player.body.setVelocityX(+speed);
+    this.enemyManager.update();
 
-      if (!this.playerIsMoving) {
-        this.player.anims.play("right", true);
-        this.playerIsMoving = true;
-        this.currentDirection = "right";
-      }
-    } else if (!this.cursor.left.isDown && !this.cursor.right.isDown) {
-      this.player.body.setVelocityX(0);
-
-      if (this.player.anims.getName() !== "idle") {
-        this.player.anims.play("idle", true);
-        this.currentDirection = null;
-        this.playerIsMoving = false;
-      }
+    if (
+      this.bonus &&
+      this.bonus.isAlive() &&
+      (this.bonus.bonusSprite.x > this.scale.width + 80 ||
+        this.bonus.bonusSprite.x < -80)
+    ) {
+      this.bonus.bonusSprite.destroy();
     }
-  }
-
-  handlePlayerHit(player, bullet) {
-    bullet.destroy();
-
-    let healt = this.scene.get("hud").getHitPoints();
-    this.scene.get("hud").update_hp(healt);
-
-    // Efecto de daño visual
-    this.tweens.add({
-      targets: this.player,
-      alpha: 0.3,
-      yoyo: true,
-      duration: 100,
-      repeat: 3,
-      onComplete: () => {
-        this.player.setAlpha(1);
-      },
-    });
   }
 
   moveParallax() {

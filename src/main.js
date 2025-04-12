@@ -2,11 +2,12 @@ import { Boot } from "./load/boot";
 import { Preload } from "./load/preload";
 import { Game } from "./scenes/game";
 import { Hud } from "./scenes/hud";
+import { MainMenu } from "./scenes/menu";
 
 const config = {
   type: Phaser.AUTO,
-  width: 160,
-  height: 206,
+  width: 288,
+  height: 240,
 
   scale: {
     mode: Phaser.Scale.FIT,
@@ -21,7 +22,7 @@ const config = {
     },
   },
   backgroundColor: "#262626", // 000000  o Negro o Gris
-  scene: [Boot, Preload, Game, Hud],
+  scene: [Boot, Preload, MainMenu, Game, Hud],
 };
 
 // Create one display
