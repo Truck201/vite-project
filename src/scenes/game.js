@@ -110,7 +110,9 @@ export class Game extends Scene {
 
     if (this.inputManager.pad) {
       this.player.playerMove(movement.x * 88); // joystick
-      if (isShooting) this.player.shootBullet();
+      if (isShooting) {
+        this.player.fireShoot(this, this.time.now);
+      }
     } else {
       this.player.playerMove(88); // teclado
     }

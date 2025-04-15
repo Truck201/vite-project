@@ -152,6 +152,42 @@ export class Player {
     });
   }
 
+  // Case Pad
+  fireShoot(scene, time) {
+    // Disparo (con enfriamiento)
+    if (time > this.lastFired + 350) {
+      const bullet = this.scene.bullets.create(
+        this.player.x,
+        this.player.y - 9,
+        "bullet"
+      );
+      bullet.setDepth(5).setScale(0.6);
+      bullet.body.setVelocityY(-300);
+      bullet.body.setCollideWorldBounds(false);
+      this.lastFired = time;
+    }
+
+    // Destruir balas que salen de pantalla
+    this.scene.bullets.children.each((b) => {
+      if (b.y < 0) {
+        b.destroy();
+      } else {
+        const ratio = Phaser.Math.Clamp(
+          1 - b.y / this.scene.scale.height,
+          0,
+          1
+        );
+
+        const red = 255;
+        const greenBlue = Math.floor(255 * (1 - ratio)); // disminuye hacia 0
+
+        // Color hexadecimal en formato 0xRRGGBB
+        const color = (red << 16) | (greenBlue << 8) | greenBlue;
+        b.setTint(color);
+      }
+    });
+  }
+
   update() {
     if (this.flares) {
       this.flares.x = this.player.x;
