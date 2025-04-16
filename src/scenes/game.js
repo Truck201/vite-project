@@ -67,13 +67,18 @@ export class Game extends Scene {
 
     // añadimos Enemigos
     this.enemyManager = new EnemyManager(this);
-    this.enemyManager.startLevel();
+
+    // Solo iniciar si no fue creado antes (por reanudación desde announcement)
+    if (!this.enemyManager.enemiesCreated) {
+      console.log("Paso por aquí?");
+      this.enemyManager.startLevel();
+    }
 
     this.player.createBulletSystem(this);
 
     // Añadir bonus
     this.time.addEvent({
-      delay: Phaser.Math.Between(1000, 2000),
+      delay: Phaser.Math.Between(7000, 12000),
       loop: true,
       callback: () => {
         if (!this.bonus || !this.bonus.isAlive()) {

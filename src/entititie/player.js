@@ -1,25 +1,34 @@
 export class Player {
   playerIsMoving = false;
   currentDirection = null;
-  playerHP = 3;
 
   constructor(scene) {
     this.scene = scene;
-    this.playerHP = 3;
     const x = this.scene.scale.width;
     const y = this.scene.scale.height;
 
+    this.isDestroyed = false;
+
     // add player
     this.player = this.scene.physics.add
-      .sprite(x * 0.5, y * 0.82, "ship")
-      .setOffset(0.5);
+      .sprite(x * 0.5, y * 0.82, "ship-sprite")
+      .setAlpha(1);
 
     this.player.body.setAllowGravity(false);
+    this.player.body.setSize(this.player.width * 0.3, this.player.height * 0.3);
     this.player.setCollideWorldBounds(true).setDepth(8);
+
+    // vidas
+    this.playerHP = 3;
     this.player.anims.play("idle", true);
 
+    // Velocidad Multiplicada
+    this.speedMultiplier = 1;
+
     // Flares
-    this.flares = this.scene.physics.add.sprite(this.player.x, 180, "flar");
+    this.flares = this.scene.physics.add
+      .sprite(this.player.x, 180, "flar")
+      .setAlpha(1);
     this.flares.setImmovable;
     this.flares.setOrigin(0.5);
     this.flares.body.allowGravity = false;
@@ -29,8 +38,10 @@ export class Player {
   }
 
   playerMove(speed) {
+    if (this.isDestroyed) return;
+    const finalSpeed = speed * this.speedMultiplier;
     if (this.cursor.left.isDown && this.currentDirection !== "left") {
-      this.player.body.setVelocityX(-speed);
+      this.player.body.setVelocityX(-finalSpeed);
 
       if (!this.playerIsMoving) {
         this.player.anims.play("left", true);
@@ -38,7 +49,7 @@ export class Player {
         this.currentDirection = "left";
       }
     } else if (this.cursor.right.isDown && this.currentDirection !== "right") {
-      this.player.body.setVelocityX(+speed);
+      this.player.body.setVelocityX(+finalSpeed);
 
       if (!this.playerIsMoving) {
         this.player.anims.play("right", true);
@@ -133,8 +144,15 @@ export class Player {
 
     // Destruir balas que salen de pantalla
     this.scene.bullets.children.each((b) => {
-      if (b.y < 0) {
-        b.destroy();
+      if (b.y <= 12) {
+        b.setTexture("bulletFinal").setScale(1);
+        b.body.setVelocityY(0); // detenerla si es necesario
+        scene.time.addEvent({
+          delay: 200,
+          callback: () => {
+            b.destroy();
+          },
+        });
       } else {
         const ratio = Phaser.Math.Clamp(
           1 - b.y / this.scene.scale.height,
@@ -188,7 +206,31 @@ export class Player {
     });
   }
 
+  destroy_player(scene) {
+    this.explotion = scene.add
+      .sprite(this.player.x, this.player.y, "explotion")
+      .setScale(1.5)
+      .setDepth(25);
+    this.explotion.anims.play("destroy", true);
+
+    scene.player.player.body.setVelocity(0, 0);
+    scene.player.player.body.enable = false;
+    scene.player.flares.body.enable = false;
+
+    this.explotion.on("animationcomplete", () => {
+      this.explotion.destroy();
+
+      scene.player.player.anims.stop();
+      scene.player.player.setVisible(false);
+      scene.player.flares.setVisible(false);
+
+      // Marcamos como destruido
+      this.isDestroyed = true;
+    });
+  }
+
   update() {
+    if (this.isDestroyed) return;
     if (this.flares) {
       this.flares.x = this.player.x;
       this.flares.y = this.player.y + 10.5; // ajustá el valor si necesitás que esté debajo

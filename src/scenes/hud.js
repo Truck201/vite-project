@@ -10,6 +10,7 @@ export class Hud extends Scene {
     this.cameras.main.fadeIn(1200, 0, 0, 0);
     this.points = data.points || 0;
     this.playerHP = data.playerHP || 3;
+    this.arrayHP = [];
   }
 
   preload() {}
@@ -32,17 +33,18 @@ export class Hud extends Scene {
       .setOrigin(0.5)
       .setDepth(10);
 
-    this.hpText = this.add
-      .text(x * 0.8, y * 0.95, `HP: ${this.playerHP}`, {
-        fontSize: "8px",
-        fontFamily: "'Press Start 2P'",
-        fill: "#fff",
-      })
-      .setOrigin(0.5)
-      .setDepth(40);
+    const HpStepsX = 10;
+    let positionHP = x * 0.2;
+
+    for (let i = 0; i < this.playerHP; i++) {
+      this.arrayHP.push(
+        this.add.sprite(positionHP, y * 0.95, "skull").setDepth(20)
+      );
+      positionHP += HpStepsX;
+    }
 
     this.levelText = this.add
-      .text(x * 0.2, y * 0.93, `Level 1`, {
+      .text(x * 0.85, y * 0.08, `Level 1`, {
         fontSize: "9px",
         fontFamily: "'Press Start 2P'",
         fill: "#00f",
@@ -70,7 +72,6 @@ export class Hud extends Scene {
   }
 
   get_level() {
-    console.log("chango");
     return this.level;
   }
 
@@ -79,23 +80,49 @@ export class Hud extends Scene {
     return this.playerHP;
   }
 
+  player_hp() {
+    return this.playerHP;
+  }
+
   update_hp(playerHP) {
-    this.hpText.setText(`Hp: ${playerHP}`);
+    if (playerHP >= 0) {
+      const life = this.arrayHP.pop();
+      life.destroy();
+    }
 
     if (playerHP <= 0) {
-      this.scene.pause("game");
-      this.add
-        .text(this.scale.width / 2, this.scale.height / 2, "💀 GAME OVER 💀", {
-          fontSize: "15px",
-          fill: "#f00",
-        })
-        .setOrigin(0.5)
-        .setDepth(200);
+      const gameScene = this.scene.get("game"); // Accede a la escena principal
 
-      this.input.once("pointerdown", () => {
-        this.scene.stop("game");
-        this.scene.start("Boot");
-        location.reload();
+      // Pausa físicas
+      gameScene.physics.pause();
+      gameScene.player.destroy_player(gameScene);
+
+      this.points_text.destroy();
+
+      if (gameScene.moveTimer?.destroy) {
+        gameScene.moveTimer.destroy();
+      }
+
+      if (gameScene.enemyManager.timerEnemyAttack?.destroy) {
+        gameScene.enemyManager.timerEnemyAttack.destroy();
+      }
+
+      if (gameScene.enemyManager.bossTimer?.destroy) {
+        gameScene.enemyManager.bossTimer.destroy();
+      }
+
+      // ✅ Detener los timers de disparo de cada boss
+      if (gameScene.bossGroup?.remove) {
+        gameScene.bossGroup.getChildren().forEach((boss) => {
+          if (boss.shootTimer) {
+            boss.shootTimer.remove();
+            boss.shootTimer = null;
+          }
+        });
+      }
+
+      this.time.delayedCall(900, () => {
+        this.scene.launch("game-over", { points: this.points });
       });
     }
   }
@@ -104,8 +131,6 @@ export class Hud extends Scene {
     console.log(`Level actual ${this.level}`);
     this.level++;
 
-    console.log(this.level, isBossLevel);
-    console.log(this.levelText);
     if (this.levelText) {
       this.levelText.setAlpha(1); // Reinicia visibilidads
 

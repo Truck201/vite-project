@@ -40,34 +40,45 @@ export class EnemyManager {
       });
     }
 
-    const columns = 7; // const columns = 7;
-    const spacingX = 28; // const spacingX = 16;
-    const spacingY = 26; // const spacingY = 14;
-    const startX = width * 0.15; // const startX = x * 0.165;
+    const columns = 8;
+    const spacingX = 20;
+    const spacingY = 20;
+    const startX = width * 0.15;
 
     const rows = [
       { type: "octopus", offset: -1 },
-      { type: "skull", offset: 0 },
-      { type: "skull", offset: 1 },
-      { type: "marciano", offset: 2 },
+      { type: "marciano", offset: 0 },
+      { type: "marciano", offset: 1 },
+      { type: "skull", offset: 2 },
+      { type: "skull", offset: 3 },
     ];
 
-    for (let col = 0; col < columns; col++) {
-      rows.forEach((row, rowIndex) => {
+    rows.forEach((row, rowIndex) => {
+      for (let col = 0; col < columns; col++) {
         const x = startX + col * spacingX;
-        const y = height * 0.22 + row.offset * spacingY;
+        const finalY = height * 0.22 + row.offset * spacingY;
+        const startY = -Phaser.Math.Between(100, 30); // empieza desde arriba de la pantalla
 
         const alien = this.scene.enemies
-          .create(x, y, row.type)
+          .create(x, startY, row.type)
           .setDepth(20)
           .setOrigin(0.5)
           .setCollideWorldBounds(true);
 
         alien.body.setImmovable(true);
         alien.body.allowGravity = false;
-        alien.anims.play(row.type + "er", true); // Asegúrate de tener "skuller", "octopuser", "marcianoer"
-      });
-    }
+        alien.anims.play(row.type + "er", true);
+
+        // Tween para descender hasta su posición final
+        this.scene.tweens.add({
+          targets: alien,
+          y: finalY,
+          duration: 1200,
+          ease: "Power2",
+          delay: Phaser.Math.Between(0, 130), // agrega variación para hacerlo más dinámico
+        });
+      }
+    });
   }
 
   setupEnemyMovement() {
@@ -105,16 +116,53 @@ export class EnemyManager {
           if (shooters.length === 0) return;
 
           const shooter = Phaser.Utils.Array.GetRandom(shooters);
-          const bullet = scene.enemyBullets.get(
-            shooter.x,
-            shooter.y + 8,
-            "bullet"
-          );
-          if (bullet) {
-            bullet.setActive(true).setVisible(true);
-            bullet.body.allowGravity = false;
-            bullet.setVelocityY(120);
-            bullet.setDepth(5).setScale(0.74);
+
+          // Cálculo de probabilidades con leve aumento por nivel
+          const levelMultiplier = this.level * 0.01; // Por cada nivel aumenta 0.1%
+          const chanceDoubleShot = 0.03 + levelMultiplier;
+          const chanceTripleShot = 0.01 + levelMultiplier;
+
+          const shotCount = (() => {
+            const rand = Math.random();
+            if (rand < chanceTripleShot) return 3;
+            if (rand < chanceTripleShot + chanceDoubleShot) return 2;
+            return 1;
+          })();
+
+          for (let i = 0; i < shotCount; i++) {
+            const bullet = scene.enemyBullets.get(
+              shooter.x,
+              shooter.y + 8,
+              "EnemyBullet"
+            );
+            if (bullet) {
+              bullet.setActive(true).setVisible(true);
+              bullet.body.allowGravity = false;
+
+              const bulletSpeed = 100 + (this.level - 1) * 5;
+              bullet.setVelocityY(bulletSpeed);
+              bullet.setDepth(5);
+
+              // Inicializa color cíclico
+              const colors = [0xff0000, 0xffff00, 0x00ff00]; // rojo, amarillo, Verde
+              let colorIndex = 0;
+              bullet.setTint(colors[colorIndex]);
+
+              // Crea un temporizador para cambiar el color cada 160ms
+              bullet.colorTimer = scene.time.addEvent({
+                delay: 250,
+                loop: true,
+                callback: () => {
+                  if (!bullet.active) {
+                    bullet.clearTint();
+                    bullet.colorTimer.remove();
+                    return;
+                  }
+                  colorIndex = (colorIndex + 1) % colors.length;
+                  bullet.setTint(colors[colorIndex]);
+                },
+              });
+            }
           }
         },
       });
@@ -161,10 +209,12 @@ export class EnemyManager {
   update() {
     if (this.isBossLevel) {
       if (this.scene.bossKilled >= 5) {
+        console.log("advance level !! boss killed >= 5");
         this.advanceLevel();
       }
     } else {
       if (this.scene.enemies.countActive(true) === 0 && this.enemiesCreated) {
+        console.log("advance level !! No enemies normal, true enemies created");
         this.advanceLevel();
       }
     }
@@ -180,7 +230,23 @@ export class EnemyManager {
     this.scene.scene.get("hud").update_level(!this.isBossLevel);
     this.level = this.scene.scene.get("hud").get_level();
 
+    // Aumentar velocidad de la nave (0.10% por nivel)
+    const speedIncrement = 0.01 * this.level; // 0.10% = 0.001
+    this.scene.player.speedMultiplier = 1 + speedIncrement;
+
+    // Aumentar velocidad del parallax
+    this.scene.parallaxLayers.forEach((layer) => {
+      layer.speed += 0.05;
+    });
+
     this.enemiesCreated = false;
-    this.startLevel();
+
+    // Ir a escena intermedia
+    this.scene.scene.launch("announcement", {
+      nextLevel: "game",
+      isBossLevel: this.level % 2 === 0,
+    });
+
+    this.scene.scene.pause("game"); // Pausa el juego temporalmente
   }
 }

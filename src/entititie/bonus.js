@@ -2,6 +2,10 @@ export class addBonus {
   constructor(scene) {
     this.scene = scene;
     this.bonusSprite = null;
+    this.colorIndex = 0;
+    this.colorTimer = null;
+    this.colors = [0xff0000, 0xffff00, 0x00ff00]; // rojo, amarillo, verde
+
     this.create();
   }
 
@@ -22,11 +26,22 @@ export class addBonus {
     this.bonusSprite = this.scene.physics.add
       .sprite(this.offset, y, "bonusFlyer")
       .setScale(1)
-      .setDepth(150);
+      .setDepth(25);
 
     this.bonusSprite.setVelocityX(this.speed);
     this.bonusSprite.body.setAllowGravity(false);
     this.bonusSprite.anims.play("flyer", true);
+
+    // 🟡 Timer para cambiar el color cada 160ms
+    this.colorTimer = this.scene.time.addEvent({
+      delay: 550,
+      loop: true,
+      callback: () => {
+        if (!this.bonusSprite || !this.bonusSprite.active) return;
+        this.bonusSprite.setTint(this.colors[this.colorIndex]);
+        this.colorIndex = (this.colorIndex + 1) % this.colors.length;
+      },
+    });
 
     if (!this.bonusSprite || !this.scene.bullets) {
       console.error("BonusSprite or Bullets undefined at overlap creation");
@@ -54,6 +69,11 @@ export class addBonus {
 
     bonus.destroy();
     bullet.destroy();
+
+    // 🔴 Limpiar el timer de colores si existe
+    if (this.colorTimer) {
+      this.colorTimer.remove(false);
+    }
 
     let explotion = this.scene.add
       .sprite(bonus.x, bonus.y, "explosion")

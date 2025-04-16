@@ -9,10 +9,18 @@ export class MainMenu extends Scene {
     const x = this.scale.width;
     const y = this.scale.height;
 
+    // Encender cámaras al iniciar el menú
+    this.cameras.main.fadeIn(900, 0, 0, 0);
+
+    this.portada = this.add.sprite(x * 0.5, y * 0.4, "portada").setDepth(5);
     // Fondo parallax
     this.asteroids = this.add
       .tileSprite(x * 0.5, y * 0.5, 0, 0, "asteroid")
       .setDepth(1);
+
+    this.asteroids2 = this.add
+      .tileSprite(x * 0.5, y * 0.5, 0, 0, "asteroid2")
+      .setDepth(2);
 
     this.stars = this.add
       .tileSprite(x * 0.5, y * 0.5, 0, 0, "background")
@@ -20,14 +28,29 @@ export class MainMenu extends Scene {
 
     this.parallaxLayers = [
       {
-        speed: 0.65,
+        speed: 0.4,
         sprite: this.asteroids,
       },
       {
         speed: 0.115,
         sprite: this.stars,
       },
+      {
+        speed: 0.6,
+        sprite: this.asteroids2,
+      },
     ];
+
+    let elapsedTime = 0;
+    this.time.addEvent({
+      delay: 400, // Cada 200ms
+      loop: true, // Hacer que sea continuo
+      callback: () => {
+        // Alterna entre alpha 0 y 1
+        this.portada.alpha = this.portada.alpha === 1 ? 0.8 : 1;
+        elapsedTime += 1500;
+      },
+    });
 
     // Opciones del menú
     this.options = ["Play", "Options"];
@@ -36,7 +59,7 @@ export class MainMenu extends Scene {
     // Texto de las opciones
     this.optionTexts = this.options.map((option, index) => {
       return this.add
-        .text(x * 0.5, y * 0.4 + index * 30, option, {
+        .text(x * 0.5, y * 0.8 + index * 25, option, {
           fontSize: "10px",
           fontFamily: "'Press Start 2P'",
           color: "#ffffff",
@@ -47,7 +70,7 @@ export class MainMenu extends Scene {
 
     // Sprite de selección (nave del jugador)
     this.selectionSprite = this.add
-      .sprite(x * 0.38, y * 0.4, "ship") // Usa tu sprite de nave aquí
+      .sprite(x * 0.38, y * 0.8, "ship") // Usa tu sprite de nave aquí
       .setScale(1)
       .setDepth(10)
       .setOrigin(0.55);

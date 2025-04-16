@@ -34,7 +34,7 @@ function bossDies(scene, boss) {
     .setScale(2);
 
   scene.time.addEvent({
-    delay: 600,
+    delay: 220,
     callback: () => {
       explosion.destroy();
     },
@@ -46,6 +46,8 @@ function bossDies(scene, boss) {
 
   boss.destroy();
   scene.bossKilled++;
+
+  scene.scene.get("hud").update_points(300);
 
   scene.time.addEvent({
     delay: Phaser.Math.Between(1800, 3600),
@@ -140,10 +142,14 @@ function shootBossProjectile(scene, boss) {
     boss.y + 10,
     "ballsprite"
   );
-  projectile.setVelocityY(80); // velocidad más lenta
+
+  const level = scene.scene.get("hud").get_level();
+  const bossBulletSpeed = 80 + (level - 1) * 10;
+  projectile.setVelocityY(bossBulletSpeed);
+
   projectile.setDepth(5);
   projectile.play("ballAnim"); // animación
-  projectile.body.setSize(projectile.width * 0.8, projectile.height * 0.8); // ajuste de hitbox si necesario
+  projectile.body.setSize(projectile.width * 0.7, projectile.height * 0.7); // ajuste de hitbox si necesario
 
   // Destruir al salir de pantalla
   projectile.checkWorldBounds = true;
@@ -152,5 +158,56 @@ function shootBossProjectile(scene, boss) {
   scene.physics.add.overlap(projectile, scene.player.player, () => {
     console.log("¡El jugador fue golpeado!");
     scene.player.handlePlayerHit(scene.player.player, projectile);
+  });
+
+  // Posibilidad de moverse (55%)
+  if (Phaser.Math.Between(1, 100) <= 55) {
+    tryMoveBoss(scene, boss);
+  }
+}
+
+function tryMoveBoss(scene, boss) {
+  const maxAttempts = 30;
+  const minDistance = 28;
+  let attempts = 0;
+  let newX, newY;
+  let validPosition = false;
+
+  while (!validPosition && attempts < maxAttempts) {
+    newX = Phaser.Math.Between(14, scene.scale.width - 14);
+    newY = Phaser.Math.Between(
+      scene.scale.height * 0.2,
+      scene.scale.height * 0.42
+    );
+
+    validPosition = true;
+
+    scene.bossGroup.getChildren().forEach((otherBoss) => {
+      if (otherBoss === boss) return; // Ignorar a sí mismo
+      const dist = Phaser.Math.Distance.Between(
+        newX,
+        newY,
+        otherBoss.x,
+        otherBoss.y
+      );
+      if (dist < minDistance) {
+        validPosition = false;
+      }
+    });
+
+    attempts++;
+  }
+
+  if (!validPosition) {
+    return; // No se encontró posición válida, no se mueve
+  }
+
+  // Mover al boss con tween
+  scene.tweens.add({
+    targets: boss,
+    x: newX,
+    y: newY,
+    duration: 600,
+    ease: "Sine.easeInOut",
   });
 }

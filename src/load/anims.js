@@ -29,6 +29,15 @@ export function initialAnimations(scene) {
     });
 
     scene.anims.create({
+      key: "destroy",
+      frames: scene.anims.generateFrameNumbers("explotion", {
+        start: 0,
+        end: 3,
+      }),
+      frameRate: 5,
+    });
+
+    scene.anims.create({
       key: "flaires",
       frames: scene.anims.generateFrameNumbers("flares", {
         start: 0,

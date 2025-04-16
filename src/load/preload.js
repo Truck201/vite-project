@@ -1,27 +1,33 @@
 import { Scene } from "phaser";
-
+import { StarterAnims } from "./startAnims";
 export class Preload extends Scene {
   constructor() {
     super("preload");
   }
 
   preload() {
-    this.load.image("asteroid", "/assets/background/parallax/asteroids-1.png");
+    // Menu
+    this.load.image("layer0", "/assets/background/backLayer.png");
+    this.load.image("layer1", "/assets/background/backLayerBlack.png");
 
+    this.load.image("portada", "/assets/menu/portada.png");
+    this.load.spritesheet("starter", "/assets/menu/starter.png", {
+      frameWidth: 288,
+      frameHeight: 240,
+    });
+
+    // background
+    this.load.image("asteroid", "/assets/background/parallax/asteroids-1.png");
+    this.load.image("asteroid2", "/assets/background/parallax/asteroids-2.png");
     this.load.image("background", "/assets/background/parallax/stars-1.png");
 
-    this.load.spritesheet(
-      "obstacle",
-      "/assets/player/spritesheet/obstaculo.png",
-      {
-        frameWidth: 28,
-        frameHeight: 14,
-      }
-    );
-
     this.load.image("bullet", "/assets/player/sprites/bullet.png");
-
+    this.load.image("bulletFinal", "/assets/player/sprites/bullet-final.png");
+    this.load.image("EnemyBullet", "/assets/Invasors/sprites/Enemybullet.png");
     this.load.image("explosion", "/assets/Invasors/sprites/explosion.png");
+
+    // player
+    this.load.image("ship-sprite", "/assets/player/sprites/idle.png");
 
     this.load.spritesheet(
       "ship",
@@ -38,6 +44,15 @@ export class Preload extends Scene {
       {
         frameWidth: 17,
         frameHeight: 17,
+      }
+    );
+
+    this.load.spritesheet(
+      "explotion",
+      "/assets/player/spritesheet/explotion.png",
+      {
+        frameWidth: 20,
+        frameHeight: 20,
       }
     );
 
@@ -105,9 +120,54 @@ export class Preload extends Scene {
         frameHeight: 14,
       }
     );
+
+    // Annuncement
+    this.load.spritesheet("annunceBoss", "/assets/annucement/anim-sos.png", {
+      frameWidth: 288,
+      frameHeight: 240,
+    });
+
+    this.load.spritesheet("annunceNormal", "/assets/annucement/anim-sos2.png", {
+      frameWidth: 288,
+      frameHeight: 240,
+    });
   }
 
   create() {
-    this.scene.start("main-menu");
+    // Configuración de animaciones
+    StarterAnims(this);
+
+    this.add
+      .sprite(this.scale.width * 0.5, this.scale.height * 0.5, "layer1")
+      .setDepth(1);
+    // Configuración de sprite inicial
+    this.starterAnim = this.add
+      .sprite(this.scale.width * 0.5, this.scale.height * 0.5, "starter")
+      .setDepth(10);
+
+    this.starterAnim.play("StartGame", true);
+
+    // Evento cuando la animación termina
+    this.starterAnim.on("animationcomplete", () => {
+      // Parpadeo cada 200ms
+      let elapsedTime = 0;
+      const blinkTimer = this.time.addEvent({
+        delay: 200, // Cada 200ms
+        loop: true, // Hacer que sea continuo
+        callback: () => {
+          // Alterna entre alpha 0 y 1
+          this.starterAnim.alpha = this.starterAnim.alpha === 1 ? 0 : 1;
+          elapsedTime += 200;
+
+          // Si ha pasado el tiempo límite (1200ms), detener el parpadeo y cambiar de escena
+          if (elapsedTime >= 1400) {
+            blinkTimer.remove(); // Detener el parpadeo
+            this.cameras.main.fadeOut(700, 0, 0, 0, () => {
+              this.scene.start("main-menu");
+            });
+          }
+        },
+      });
+    });
   }
 }
