@@ -40,7 +40,7 @@ export class EnemyManager {
       });
     }
 
-    const columns = 8;
+    const columns = 2;
     const spacingX = 20;
     const spacingY = 20;
     const startX = width * 0.15;
@@ -248,5 +248,8 @@ export class EnemyManager {
     });
 
     this.scene.scene.pause("game"); // Pausa el juego temporalmente
+
+    // Sounds Manage
+    this.scene.stopAllSounds(this.scene); // Pausa todos los sonidos activos
   }
 }

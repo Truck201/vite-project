@@ -16,6 +16,10 @@ export class GameOver extends Scene {
     const centerX = width / 2;
     const centerY = height / 2;
 
+    if (this.scene.get("game").BonusIdle) {
+      this.scene.get("game").BonusIdle.pause();
+    }
+
     this.add
       .text(centerX, centerY - 70, "💀 GAME OVER 💀", {
         fontSize: "18px",

@@ -71,7 +71,6 @@ export class Player {
     bullet.destroy();
 
     let healt = this.scene.scene.get("hud").damage_player();
-    console.log(healt);
     this.scene.scene.get("hud").update_hp(healt);
 
     // Efecto de daño visual
@@ -85,6 +84,8 @@ export class Player {
         this.player.setAlpha(1);
       },
     });
+
+    this.scene.PlayerHit.play();
   }
 
   createBulletSystem(scene) {
@@ -124,6 +125,9 @@ export class Player {
 
         // update 10 points
         scene.scene.get("hud").update_points(10);
+
+        scene.EnemyDead.play();
+        scene.activeSounds.push(scene.EnemyDead);
       }
     );
   }
@@ -140,6 +144,8 @@ export class Player {
       bullet.body.setVelocityY(-300);
       bullet.body.setCollideWorldBounds(false);
       this.lastFired = time;
+
+      this.scene.PlayerBullet_1.play();
     }
 
     // Destruir balas que salen de pantalla
@@ -227,6 +233,9 @@ export class Player {
       // Marcamos como destruido
       this.isDestroyed = true;
     });
+
+    this.scene.PlayerHit.play();
+    this.scene.PlayerDead.play();
   }
 
   update() {

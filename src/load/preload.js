@@ -1,11 +1,14 @@
 import { Scene } from "phaser";
 import { StarterAnims } from "./startAnims";
+import { Sounds } from "./audios";
 export class Preload extends Scene {
   constructor() {
     super("preload");
   }
 
   preload() {
+    // Sounds
+    Sounds(this);
     // Menu
     this.load.image("layer0", "/assets/background/backLayer.png");
     this.load.image("layer1", "/assets/background/backLayerBlack.png");

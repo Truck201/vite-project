@@ -15,6 +15,8 @@ export class Announcement extends Scene {
   create() {
     const { width, height } = this.scale;
 
+    this.scene.get("game").BonusIdle.pause();
+
     this.back = this.add
       .sprite(width * 0.5, height * 0.5, "layer1")
       .setAlpha(1);
@@ -32,7 +34,9 @@ export class Announcement extends Scene {
       this.time.delayedCall(200, () => {
         this.back.setAlpha(0);
         this.scene.resume(this.nextLevel);
+        this.scene.get("game").BonusIdle.resume();
         this.scene.get("game").enemyManager.startLevel();
+        this.scene.stop("announcement");
       });
     });
   }

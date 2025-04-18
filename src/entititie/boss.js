@@ -58,6 +58,8 @@ function bossDies(scene, boss) {
       }
     },
   });
+
+  scene.BossDead_1.play();
 }
 
 function appearBoss(scene) {
@@ -134,6 +136,9 @@ function appearBoss(scene) {
       shootBossProjectile(scene, boss);
     },
   });
+
+  scene.BossAppear_1.play();
+  scene.activeSounds.push(scene.BossAppear_1);
 }
 
 function shootBossProjectile(scene, boss) {
@@ -164,6 +169,9 @@ function shootBossProjectile(scene, boss) {
   if (Phaser.Math.Between(1, 100) <= 55) {
     tryMoveBoss(scene, boss);
   }
+
+  scene.BossBullet.play();
+  scene.activeSounds.push(scene.BossBullet);
 }
 
 function tryMoveBoss(scene, boss) {

@@ -32,6 +32,14 @@ export class addBonus {
     this.bonusSprite.body.setAllowGravity(false);
     this.bonusSprite.anims.play("flyer", true);
 
+    // Verificar si la escena 'announcement' está activa
+    if (!this.scene.scene.isActive("announcement")) {
+      this.scene.BonusIdle.play();
+    } else {
+      // Si ya está activa, pausar por si estuviera sonando
+      this.scene.BonusIdle.pause();
+    }
+
     // 🟡 Timer para cambiar el color cada 160ms
     this.colorTimer = this.scene.time.addEvent({
       delay: 550,
@@ -107,5 +115,10 @@ export class addBonus {
     });
 
     this.scene.scene.get("hud").update_points(500);
+
+    // Sounds
+    this.scene.BonusIdle.stop();
+    this.scene.BonusHit.play();
+    this.scene.BonusDead.play();
   }
 }

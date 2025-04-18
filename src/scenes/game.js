@@ -4,6 +4,7 @@ import { Player } from "../entititie/player";
 import { EnemyManager } from "../entititie/EnemyManager";
 import { addBonus } from "../entititie/bonus";
 import { InputManager } from "../component/imputManager";
+import { addSounds } from "../load/importAudio";
 
 export class Game extends Scene {
   constructor() {
@@ -20,6 +21,10 @@ export class Game extends Scene {
 
   create() {
     initialAnimations(this);
+    addSounds(this);
+
+    // Sounds
+    this.activeSounds = [];
 
     // fondo
     this.asteroids = this.add
@@ -137,12 +142,44 @@ export class Game extends Scene {
         this.bonus.bonusSprite.x < -80)
     ) {
       this.bonus.bonusSprite.destroy();
+      this.BonusIdle.stop();
     }
   }
 
   moveParallax() {
     this.parallaxLayers.forEach((layer) => {
       layer.sprite.tilePositionY -= layer.speed;
+    });
+  }
+
+  pauseAllSounds() {
+    console.log("NNO ---> ");
+    if (!this.activeSounds) return;
+    console.log("si o no? ---> ");
+    this.activeSounds.forEach((sound) => {
+      console.log(`sound ?? --> ${sound}`);
+      if (sound.isPlaying) {
+        console.log(`sound playing--> ${sound}`);
+        sound.pause();
+      }
+    });
+  }
+
+  resumeAllSounds() {
+    if (!this.activeSounds) return;
+    this.activeSounds.forEach((sound) => {
+      if (sound.isPaused) {
+        sound.resume();
+      }
+    });
+  }
+
+  stopAllSounds() {
+    if (!this.activeSounds) return;
+    this.activeSounds.forEach((sound) => {
+      if (sound.isPlaying || sound.isPaused) {
+        sound.stop();
+      }
     });
   }
 }
