@@ -40,7 +40,7 @@ export class EnemyManager {
       });
     }
 
-    const columns = 2;
+    const columns = 8;
     const spacingX = 20;
     const spacingY = 20;
     const startX = width * 0.15;
