@@ -33,7 +33,7 @@ export class Game extends Scene {
         this.game.config.height * 0.5,
         0,
         0,
-        "asteroid"
+        "background"
       )
       .setDepth(1);
 
@@ -45,7 +45,8 @@ export class Game extends Scene {
         0,
         "background"
       )
-      .setDepth(0);
+      .setDepth(0)
+      .setAlpha(0.4);
 
     this.parallaxLayers = [
       {
@@ -83,7 +84,7 @@ export class Game extends Scene {
 
     // Añadir bonus
     this.time.addEvent({
-      delay: Phaser.Math.Between(7000, 12000),
+      delay: Phaser.Math.Between(9000, 15000),
       loop: true,
       callback: () => {
         if (!this.bonus || !this.bonus.isAlive()) {
@@ -153,13 +154,9 @@ export class Game extends Scene {
   }
 
   pauseAllSounds() {
-    console.log("NNO ---> ");
     if (!this.activeSounds) return;
-    console.log("si o no? ---> ");
     this.activeSounds.forEach((sound) => {
-      console.log(`sound ?? --> ${sound}`);
       if (sound.isPlaying) {
-        console.log(`sound playing--> ${sound}`);
         sound.pause();
       }
     });

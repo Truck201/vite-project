@@ -101,18 +101,17 @@ export class Preload extends Scene {
 
     // Boss
 
-    this.load.image("boss", "/assets/Invasors/sprites/boss.png");
+    this.load.image("boss", "/assets/Invasors/sprites/nave-martian.png");
 
     this.load.spritesheet(
       "bossIdle",
-      "/assets/Invasors/spritesheet/boss-idle.png",
+      "/assets/Invasors/spritesheet/nave-idle-martian.png",
       {
-        frameWidth: 32,
-        frameHeight: 18,
+        frameWidth: 20,
+        frameHeight: 12,
       }
     );
 
-    // shoot
     this.load.image("ballsprite", "/assets/Invasors/sprites/boss-ball.png");
 
     this.load.spritesheet(
@@ -123,6 +122,23 @@ export class Preload extends Scene {
         frameHeight: 14,
       }
     );
+
+    // Standing Boss
+    this.load.image(
+      "standing_boss",
+      "/assets/Invasors/sprites/boss-martian-1.png"
+    );
+
+    this.load.spritesheet(
+      "standing_boss_idle",
+      "/assets/Invasors/spritesheet/boss-idle-martian.png",
+      {
+        frameWidth: 44,
+        frameHeight: 44,
+      }
+    );
+
+    this.load.image("raySprite", "/assets/Invasors/sprites/boss-ball.png");
 
     // Annuncement
     this.load.spritesheet("annunceBoss", "/assets/annucement/anim-sos.png", {

@@ -23,6 +23,7 @@ export function Sounds(scene) {
     // Boss
     { key: "boss_appear_1", path: "boss/appear" },
     { key: "boss_appear_2", path: "boss/appear2" },
+    { key: "boss_damage", path: "boss/damage" },
     { key: "boss_dead_1", path: "boss/dead" },
     { key: "boss_dead_2", path: "boss/dead2" },
     { key: "boss_move", path: "boss/move" },

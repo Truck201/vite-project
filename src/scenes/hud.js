@@ -33,19 +33,19 @@ export class Hud extends Scene {
       .setOrigin(0.5)
       .setDepth(10);
 
-    const HpStepsX = 10;
+    const HpStepsX = 18;
     let positionHP = x * 0.2;
 
     for (let i = 0; i < this.playerHP; i++) {
       this.arrayHP.push(
-        this.add.sprite(positionHP, y * 0.95, "skull").setDepth(20)
+        this.add.sprite(positionHP, y * 0.95, "ship-sprite").setDepth(20)
       );
       positionHP += HpStepsX;
     }
 
     this.levelText = this.add
       .text(x * 0.85, y * 0.08, `Level 1`, {
-        fontSize: "9px",
+        fontSize: "12px",
         fontFamily: "'Press Start 2P'",
         fill: "#00f",
       })
@@ -109,6 +109,18 @@ export class Hud extends Scene {
 
       if (gameScene.enemyManager.bossTimer?.destroy) {
         gameScene.enemyManager.bossTimer.destroy();
+      }
+
+      if (gameScene.BonusIdle) {
+        gameScene.BonusIdle.stop();
+      }
+
+      if (gameScene.BonusIdle) {
+        gameScene.BonusIdle.stop();
+      }
+
+      if (gameScene.alienSounds) {
+        gameScene.alienSounds = [];
       }
 
       // ✅ Detener los timers de disparo de cada boss

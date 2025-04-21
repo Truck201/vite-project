@@ -56,7 +56,7 @@ export class EnemyManager {
     rows.forEach((row, rowIndex) => {
       for (let col = 0; col < columns; col++) {
         const x = startX + col * spacingX;
-        const finalY = height * 0.22 + row.offset * spacingY;
+        const finalY = height * 0.25 + row.offset * spacingY;
         const startY = -Phaser.Math.Between(100, 30); // empieza desde arriba de la pantalla
 
         const alien = this.scene.enemies
@@ -90,10 +90,22 @@ export class EnemyManager {
       scene.enemieSpeed = scene.baseSpeed;
 
       scene.moveTimer = scene.time.addEvent({
-        delay: 80,
+        delay: 90,
         loop: true,
-        callback: () => this.moveEnemies(),
+        callback: () => {
+          this.moveEnemies();
+        },
       });
+
+      if (!scene.alienSoundTimer) {
+        scene.alienSoundTimer = scene.time.addEvent({
+          delay: 400, // puedes ajustar luego dinámicamente
+          loop: true,
+          callback: () => {
+            this.playAlienMoveSound();
+          },
+        });
+      }
     }
   }
 
@@ -174,12 +186,23 @@ export class EnemyManager {
     const scene = this.scene;
     const enemiesRemaining = scene.enemies.countActive(true);
 
-    if (enemiesRemaining <= 5 && enemiesRemaining > 0) {
-      const power = 6.2 - enemiesRemaining;
-      scene.enemieSpeed = scene.baseSpeed * Math.pow(2, power);
-    } else {
-      scene.enemieSpeed = scene.baseSpeed;
+    let speedMultiplier = 1;
+
+    if (enemiesRemaining <= 25 && enemiesRemaining > 10) {
+      speedMultiplier = 1.8; // aumento leve
+    } else if (enemiesRemaining <= 20 && enemiesRemaining >= 5) {
+      speedMultiplier = 2; // aumento más notorio
+    } else if (enemiesRemaining <= 15 && enemiesRemaining > 10) {
+      speedMultiplier = 2.5; // aumento leve
+    } else if (enemiesRemaining <= 10 && enemiesRemaining >= 5) {
+      speedMultiplier = 3.2; // aumento más notorio
+    } else if (enemiesRemaining <= 5 && enemiesRemaining > 0) {
+      // incremento exponencial, muy rápido
+      const power = 6 - enemiesRemaining; // 1 a 4
+      speedMultiplier = Math.pow(2.22, power);
     }
+
+    scene.enemieSpeed = scene.baseSpeed * speedMultiplier;
 
     if (scene.shouldMoveDown) {
       scene.enemies.children.iterate((alien) => (alien.y += 10));
@@ -204,12 +227,18 @@ export class EnemyManager {
     scene.enemies.children.iterate((alien) => {
       alien.x += scene.enemieSpeed * scene.alienDirection;
     });
+
+    scene.alienSoundTimer.delay = Phaser.Math.Clamp(
+      400 / scene.enemieSpeed,
+      80,
+      800
+    );
   }
 
   update() {
     if (this.isBossLevel) {
-      if (this.scene.bossKilled >= 5) {
-        console.log("advance level !! boss killed >= 5");
+      if (this.scene.bossStanding_defeat === true) {
+        console.log("advance level !! boss Standing killed");
         this.advanceLevel();
       }
     } else {
@@ -251,5 +280,23 @@ export class EnemyManager {
 
     // Sounds Manage
     this.scene.stopAllSounds(this.scene); // Pausa todos los sonidos activos
+  }
+
+  playAlienMoveSound() {
+    const scene = this.scene;
+
+    // Reproducir el siguiente sonido en secuencia
+    const sound = scene.alienSounds[scene.currentAlienSoundIndex];
+    if (sound) {
+      sound.play();
+    }
+
+    // Avanzar al siguiente sonido (0 → 1 → 2 → 3 → 0 …)
+    scene.currentAlienSoundIndex =
+      (scene.currentAlienSoundIndex + 1) % scene.alienSounds.length;
+
+    if (this.isBossLevel) {
+      sound.stop();
+    }
   }
 }

@@ -107,5 +107,15 @@ export function initialAnimations(scene) {
       frameRate: 5,
       repeat: -1,
     });
+
+    scene.anims.create({
+      key: "standing-boss-idle",
+      frames: scene.anims.generateFrameNumbers("standing_boss_idle", {
+        start: 0,
+        end: 2,
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
   }
 }

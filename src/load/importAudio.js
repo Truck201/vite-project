@@ -1,7 +1,7 @@
 export function addSounds(scene) {
   // --> Bonus
   scene.BonusIdle = scene.sound.add("bonus_idle_2", {
-    volume: 0.05,
+    volume: 0.035,
     loop: true,
   });
   scene.BonusHit = scene.sound.add("bonus_hit", { volume: 0.07 });
@@ -16,10 +16,10 @@ export function addSounds(scene) {
   // --> Enemy
   scene.currentAlienSoundIndex = 0;
   scene.alienSounds = [
-    scene.sound.add("enemy_move_1", { volume: 0.1 }),
-    scene.sound.add("enemy_move_2", { volume: 0.1 }),
-    scene.sound.add("enemy_move_3", { volume: 0.1 }),
-    scene.sound.add("enemy_move_4", { volume: 0.1 }),
+    scene.sound.add("enemy_move_1", { volume: 0.09 }),
+    scene.sound.add("enemy_move_2", { volume: 0.09 }),
+    scene.sound.add("enemy_move_3", { volume: 0.09 }),
+    scene.sound.add("enemy_move_4", { volume: 0.09 }),
   ];
 
   scene.EnemyDead = scene.sound.add("enemy_dead", { volume: 0.08 });
@@ -30,6 +30,7 @@ export function addSounds(scene) {
   scene.BossAppear_1 = scene.sound.add("boss_appear_2", { volume: 0.08 });
   scene.BossDead_1 = scene.sound.add("boss_dead_1", { volume: 0.08 });
   scene.BossDead_2 = scene.sound.add("boss_dead_2", { volume: 0.08 });
+  scene.BossDamage = scene.sound.add("boss_damage", { volume: 0.04 });
   // scene.BossMove = scene.sound.add("boss_move", { volume: 0.1 });
   scene.BossBullet = scene.sound.add("boss_bullet", { volume: 0.05 });
 }
