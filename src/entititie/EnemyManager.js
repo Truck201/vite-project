@@ -102,7 +102,7 @@ export class EnemyManager {
           delay: 400, // puedes ajustar luego dinámicamente
           loop: true,
           callback: () => {
-            this.playAlienMoveSound();
+            this.playAlienMoveSound(true);
           },
         });
       }
@@ -282,7 +282,12 @@ export class EnemyManager {
     this.scene.stopAllSounds(this.scene); // Pausa todos los sonidos activos
   }
 
-  playAlienMoveSound() {
+  playAlienMoveSound(condition) {
+    if (condition === false){
+      scene.alienSounds = []
+      return
+    }
+    
     const scene = this.scene;
 
     // Reproducir el siguiente sonido en secuencia
