@@ -119,8 +119,8 @@ export class Hud extends Scene {
         gameScene.BonusIdle.stop();
       }
 
-      if (gameScene.alienSounds) {
-        gameScene.alienSounds = [];
+      if (gameScene.enemyManager.playAlienMoveSound) {
+        gameScene.enemyManager.playAlienMoveSound(false)
       }
 
       // ✅ Detener los timers de disparo de cada boss
