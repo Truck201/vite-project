@@ -33,7 +33,10 @@ export class addBonus {
     this.bonusSprite.anims.play("flyer", true);
 
     // Verificar si la escena 'announcement' está activa
-    if (!this.scene.scene.isActive("announcement")) {
+    if (
+      !this.scene.scene.isActive("announcement") ||
+      !this.scene.scene.isActive("game-over")
+    ) {
       this.scene.BonusIdle.play();
     } else {
       // Si ya está activa, pausar por si estuviera sonando
@@ -120,5 +123,9 @@ export class addBonus {
     this.scene.BonusIdle.stop();
     this.scene.BonusHit.play();
     this.scene.BonusDead.play();
+  }
+
+  muteBonus() {
+    this.scene.BonusIdle.stop();
   }
 }

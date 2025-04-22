@@ -91,51 +91,7 @@ export class Hud extends Scene {
     }
 
     if (playerHP <= 0) {
-      const gameScene = this.scene.get("game"); // Accede a la escena principal
-
-      // Pausa físicas
-      gameScene.physics.pause();
-      gameScene.player.destroy_player(gameScene);
-
-      this.points_text.destroy();
-
-      if (gameScene.moveTimer?.destroy) {
-        gameScene.moveTimer.destroy();
-      }
-
-      if (gameScene.enemyManager.timerEnemyAttack?.destroy) {
-        gameScene.enemyManager.timerEnemyAttack.destroy();
-      }
-
-      if (gameScene.enemyManager.bossTimer?.destroy) {
-        gameScene.enemyManager.bossTimer.destroy();
-      }
-
-      if (gameScene.BonusIdle) {
-        gameScene.BonusIdle.stop();
-      }
-
-      if (gameScene.BonusIdle) {
-        gameScene.BonusIdle.stop();
-      }
-
-      if (gameScene.enemyManager.playAlienMoveSound) {
-        gameScene.enemyManager.playAlienMoveSound(false)
-      }
-
-      // ✅ Detener los timers de disparo de cada boss
-      if (gameScene.bossGroup?.remove) {
-        gameScene.bossGroup.getChildren().forEach((boss) => {
-          if (boss.shootTimer) {
-            boss.shootTimer.remove();
-            boss.shootTimer = null;
-          }
-        });
-      }
-
-      this.time.delayedCall(900, () => {
-        this.scene.launch("game-over", { points: this.points });
-      });
+      this.goToGameOver();
     }
   }
 
@@ -164,5 +120,53 @@ export class Hud extends Scene {
         },
       });
     }
+  }
+
+  goToGameOver() {
+    const gameScene = this.scene.get("game"); // Accede a la escena principal
+
+    // Pausa físicas
+    gameScene.physics.pause();
+    gameScene.player.destroy_player(gameScene);
+
+    this.points_text.destroy();
+
+    if (gameScene.moveTimer?.destroy) {
+      gameScene.moveTimer.destroy();
+    }
+
+    if (gameScene.enemyManager.timerEnemyAttack?.destroy) {
+      gameScene.enemyManager.timerEnemyAttack.destroy();
+    }
+
+    if (gameScene.enemyManager.bossTimer?.destroy) {
+      gameScene.enemyManager.bossTimer.destroy();
+    }
+
+    if (gameScene.BonusIdle) {
+      gameScene.BonusIdle.stop();
+    }
+
+    if (gameScene.BonusIdle) {
+      gameScene.BonusIdle.stop();
+    }
+
+    if (gameScene.enemyManager.playAlienMoveSound) {
+      gameScene.enemyManager.playAlienMoveSound(false, gameScene);
+    }
+
+    // ✅ Detener los timers de disparo de cada boss
+    if (gameScene.bossGroup?.remove) {
+      gameScene.bossGroup.getChildren().forEach((boss) => {
+        if (boss.shootTimer) {
+          boss.shootTimer.remove();
+          boss.shootTimer = null;
+        }
+      });
+    }
+
+    this.time.delayedCall(900, () => {
+      this.scene.launch("game-over", { points: this.points });
+    });
   }
 }

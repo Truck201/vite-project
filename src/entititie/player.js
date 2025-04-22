@@ -15,7 +15,7 @@ export class Player {
       .setAlpha(1);
 
     this.player.body.setAllowGravity(false);
-    this.player.body.setSize(this.player.width * 0.3, this.player.height * 0.3);
+    this.player.body.setSize(this.player.width * 0.3, this.player.height * 0.9);
     this.player.setCollideWorldBounds(true).setDepth(8);
 
     // vidas
@@ -40,21 +40,30 @@ export class Player {
   playerMove(speed) {
     if (this.isDestroyed) return;
     const finalSpeed = speed * this.speedMultiplier;
-    if (this.cursor.left.isDown && this.currentDirection !== "left") {
-      this.player.body.setVelocityX(-finalSpeed);
+    const minX = 20;
+    const maxX = this.scene.scale.width - 20;
 
-      if (!this.playerIsMoving) {
-        this.player.anims.play("left", true);
-        this.playerIsMoving = true;
-        this.currentDirection = "left";
+    if (this.cursor.left.isDown && this.currentDirection !== "left") {
+      if (this.player.x > minX) {
+        this.player.body.setVelocityX(-finalSpeed);
+        if (!this.playerIsMoving) {
+          this.player.anims.play("left", true);
+          this.playerIsMoving = true;
+          this.currentDirection = "left";
+        }
+      } else {
+        this.player.body.setVelocityX(0);
       }
     } else if (this.cursor.right.isDown && this.currentDirection !== "right") {
-      this.player.body.setVelocityX(+finalSpeed);
-
-      if (!this.playerIsMoving) {
-        this.player.anims.play("right", true);
-        this.playerIsMoving = true;
-        this.currentDirection = "right";
+      if (this.player.x <= maxX) {
+        this.player.body.setVelocityX(+finalSpeed);
+        if (!this.playerIsMoving) {
+          this.player.anims.play("right", true);
+          this.playerIsMoving = true;
+          this.currentDirection = "right";
+        }
+      } else {
+        this.player.body.setVelocityX(0);
       }
     } else if (!this.cursor.left.isDown && !this.cursor.right.isDown) {
       this.player.body.setVelocityX(0);
@@ -133,6 +142,8 @@ export class Player {
   }
 
   updateBullets(scene, time) {
+    if (this.isDestroyed) return;
+
     // Disparo (con enfriamiento)
     if (this.spaceKey.isDown && time > this.lastFired + 350) {
       const bullet = this.scene.bullets.create(
@@ -233,6 +244,8 @@ export class Player {
       // Marcamos como destruido
       this.isDestroyed = true;
     });
+
+    this.scene.cameras.main.shake(150, 0.01); // sacudida
 
     this.scene.PlayerHit.play();
     this.scene.PlayerDead.play();

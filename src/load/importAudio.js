@@ -8,9 +8,9 @@ export function addSounds(scene) {
   scene.BonusDead = scene.sound.add("bonus_dead", { volume: 0.07 });
 
   // --> Player
-  scene.PlayerBullet_1 = scene.sound.add("bullet_1", { volume: 0.07 });
-  scene.PlayerBullet_2 = scene.sound.add("bullet_2", { volume: 0.07 });
-  scene.PlayerDead = scene.sound.add("player_dead", { volume: 0.1 });
+  scene.PlayerBullet_1 = scene.sound.add("bullet_1", { volume: 0.06 });
+  scene.PlayerBullet_2 = scene.sound.add("bullet_2", { volume: 0.06 });
+  scene.PlayerDead = scene.sound.add("player_dead", { volume: 0.17 });
   scene.PlayerHit = scene.sound.add("player_hit", { volume: 0.1 });
 
   // --> Enemy

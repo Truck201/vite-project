@@ -75,7 +75,7 @@ export class EnemyManager {
           y: finalY,
           duration: 1200,
           ease: "Power2",
-          delay: Phaser.Math.Between(0, 130), // agrega variación para hacerlo más dinámico
+          delay: Phaser.Math.Between(0, 150), // agrega variación para hacerlo más dinámico
         });
       }
     });
@@ -102,7 +102,7 @@ export class EnemyManager {
           delay: 400, // puedes ajustar luego dinámicamente
           loop: true,
           callback: () => {
-            this.playAlienMoveSound(true);
+            this.playAlienMoveSound(true, this.scene);
           },
         });
       }
@@ -186,16 +186,16 @@ export class EnemyManager {
     const scene = this.scene;
     const enemiesRemaining = scene.enemies.countActive(true);
 
-    let speedMultiplier = 1;
+    let speedMultiplier = 2;
 
     if (enemiesRemaining <= 25 && enemiesRemaining > 10) {
-      speedMultiplier = 1.8; // aumento leve
-    } else if (enemiesRemaining <= 20 && enemiesRemaining >= 5) {
-      speedMultiplier = 2; // aumento más notorio
-    } else if (enemiesRemaining <= 15 && enemiesRemaining > 10) {
       speedMultiplier = 2.5; // aumento leve
+    } else if (enemiesRemaining <= 20 && enemiesRemaining >= 5) {
+      speedMultiplier = 3.7; // aumento más notorio
+    } else if (enemiesRemaining <= 15 && enemiesRemaining > 10) {
+      speedMultiplier = 5.2; // aumento leve
     } else if (enemiesRemaining <= 10 && enemiesRemaining >= 5) {
-      speedMultiplier = 3.2; // aumento más notorio
+      speedMultiplier = 6.5; // aumento más notorio
     } else if (enemiesRemaining <= 5 && enemiesRemaining > 0) {
       // incremento exponencial, muy rápido
       const power = 6 - enemiesRemaining; // 1 a 4
@@ -213,7 +213,7 @@ export class EnemyManager {
     let reachedEdge = false;
     scene.enemies.children.iterate((alien) => {
       const nextX = alien.x + scene.enemieSpeed * scene.alienDirection;
-      if (nextX >= scene.scale.width - 10 || nextX <= 10) {
+      if (nextX >= scene.scale.width - 4.2 || nextX <= 4.2) {
         reachedEdge = true;
       }
     });
@@ -247,6 +247,24 @@ export class EnemyManager {
         this.advanceLevel();
       }
     }
+
+    this.scene.enemies.children.iterate((enemy) => {
+      if (!enemy.active) return;
+
+      const playerY = this.scene.player.player.y;
+      if (enemy.y >= playerY - 5) {
+        enemy.destroy();
+
+        // Aplica daño al jugador
+        if (this.scene.player.handlePlayerHit) {
+          this.scene.player.handlePlayerHit.bind(this.scene.player); // o la cantidad de daño que desees
+        }
+
+        // Opcional: feedback visual o sonoro
+        this.scene.cameras.main.shake(150, 0.01); // sacudida
+        this.scene.sound.play("player_hit"); // sonido de golpe, si lo tienes
+      }
+    });
   }
 
   is_boss_level() {
@@ -270,25 +288,27 @@ export class EnemyManager {
 
     this.enemiesCreated = false;
 
-    // Ir a escena intermedia
-    this.scene.scene.launch("announcement", {
-      nextLevel: "game",
-      isBossLevel: this.level % 2 === 0,
-    });
+    this.playerHP = this.scene.scene.get("hud").player_hp();
+    if (this.playerHP <= 0) {
+      this.scene.scene.get("hud").goToGameOver();
+    } else {
+      // Ir a escena intermedia
+      this.scene.scene.launch("announcement", {
+        nextLevel: "game",
+        isBossLevel: this.level % 2 === 0,
+      });
 
-    this.scene.scene.pause("game"); // Pausa el juego temporalmente
-
-    // Sounds Manage
-    this.scene.stopAllSounds(this.scene); // Pausa todos los sonidos activos
+      this.scene.scene.pause("game"); // Pausa el juego temporalmente
+      // Sounds Manage
+      this.scene.stopAllSounds(this.scene); // Pausa todos los sonidos activos
+    }
   }
 
-  playAlienMoveSound(condition) {
-    if (condition === false){
-      scene.alienSounds = []
-      return
+  playAlienMoveSound(condition, scene) {
+    if (condition === false) {
+      scene.alienSounds = [];
+      return;
     }
-    
-    const scene = this.scene;
 
     // Reproducir el siguiente sonido en secuencia
     const sound = scene.alienSounds[scene.currentAlienSoundIndex];
@@ -301,7 +321,9 @@ export class EnemyManager {
       (scene.currentAlienSoundIndex + 1) % scene.alienSounds.length;
 
     if (this.isBossLevel) {
-      sound.stop();
+      if (sound) {
+        sound.stop();
+      }
     }
   }
 }

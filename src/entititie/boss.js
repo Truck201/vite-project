@@ -31,22 +31,21 @@ export function spawnBoss(scene) {
 }
 
 function bossDies(scene, boss) {
-  const explosion = scene.add
-    .sprite(boss.x, boss.y, "explosion")
-    .setDepth(20)
-    .setScale(2);
+  const explotion = scene.add
+    .sprite(boss.x, boss.y, "explotion")
+    .setScale(1)
+    .setDepth(60);
+  explotion.anims.play("destroy", true);
 
-  scene.time.addEvent({
-    delay: 220,
-    callback: () => {
-      explosion.destroy();
-    },
+  explotion.on("animationcomplete", () => {
+    explotion.destroy();
   });
+
+  scene.PlayerDead.play();
   // Cancelar el disparo si aún existe el timer
   if (boss.shootTimer) {
     boss.shootTimer.remove();
   }
-
   boss.destroy();
   scene.bossKilled++;
 
