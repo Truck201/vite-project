@@ -140,6 +140,15 @@ export class Preload extends Scene {
 
     this.load.image("raySprite", "/assets/Invasors/sprites/boss-ball.png");
 
+    this.load.spritesheet(
+      "raySprite-anim",
+      "/assets/Invasors/spritesheet/boss-ray-idle.png",
+      {
+        frameWidth: 16,
+        frameHeight: 14,
+      }
+    );
+
     // Annuncement
     this.load.spritesheet("annunceBoss", "/assets/annucement/anim-sos.png", {
       frameWidth: 288,

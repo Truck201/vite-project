@@ -2,8 +2,9 @@ export class Player {
   playerIsMoving = false;
   currentDirection = null;
 
-  constructor(scene) {
+  constructor(scene, inputManager) {
     this.scene = scene;
+    this.inputManager = inputManager;
     const x = this.scene.scale.width;
     const y = this.scene.scale.height;
 
@@ -39,35 +40,32 @@ export class Player {
 
   playerMove(speed) {
     if (this.isDestroyed) return;
+
     const finalSpeed = speed * this.speedMultiplier;
-    const minX = 20;
-    const maxX = this.scene.scale.width - 20;
+    let moveX = 0;
 
-    if (this.cursor.left.isDown && this.currentDirection !== "left") {
-      if (this.player.x > minX) {
-        this.player.body.setVelocityX(-finalSpeed);
-        if (!this.playerIsMoving) {
-          this.player.anims.play("left", true);
-          this.playerIsMoving = true;
-          this.currentDirection = "left";
-        }
-      } else {
-        this.player.body.setVelocityX(0);
-      }
-    } else if (this.cursor.right.isDown && this.currentDirection !== "right") {
-      if (this.player.x <= maxX) {
-        this.player.body.setVelocityX(+finalSpeed);
-        if (!this.playerIsMoving) {
-          this.player.anims.play("right", true);
-          this.playerIsMoving = true;
-          this.currentDirection = "right";
-        }
-      } else {
-        this.player.body.setVelocityX(0);
-      }
-    } else if (!this.cursor.left.isDown && !this.cursor.right.isDown) {
-      this.player.body.setVelocityX(0);
+    // Prioridad al gamepad
+    if (this.inputManager && this.inputManager.pad) {
+      const gamepadMove = this.inputManager.getMovement();
+      moveX = gamepadMove.x;
+    } else {
+      // Fallback a teclado
+      if (this.cursor.left.isDown) moveX = -1;
+      else if (this.cursor.right.isDown) moveX = 1;
+    }
 
+    this.player.body.setVelocityX(moveX * finalSpeed);
+
+    // Animaciones
+    if (moveX < -0.1 && this.currentDirection !== "left") {
+      this.player.anims.play("left", true);
+      this.playerIsMoving = true;
+      this.currentDirection = "left";
+    } else if (moveX > 0.1 && this.currentDirection !== "right") {
+      this.player.anims.play("right", true);
+      this.playerIsMoving = true;
+      this.currentDirection = "right";
+    } else if (Math.abs(moveX) < 0.1) {
       if (this.player.anims.getName() !== "idle") {
         this.player.anims.play("idle", true);
         this.currentDirection = null;
@@ -145,7 +143,10 @@ export class Player {
     if (this.isDestroyed) return;
 
     // Disparo (con enfriamiento)
-    if (this.spaceKey.isDown && time > this.lastFired + 350) {
+    if (
+      (this.spaceKey.isDown && time > this.lastFired + 350) ||
+      (this.inputManager.isShooting() && time > this.lastFired + 350)
+    ) {
       const bullet = this.scene.bullets.create(
         this.player.x,
         this.player.y - 9,
@@ -170,42 +171,6 @@ export class Player {
             b.destroy();
           },
         });
-      } else {
-        const ratio = Phaser.Math.Clamp(
-          1 - b.y / this.scene.scale.height,
-          0,
-          1
-        );
-
-        const red = 255;
-        const greenBlue = Math.floor(255 * (1 - ratio)); // disminuye hacia 0
-
-        // Color hexadecimal en formato 0xRRGGBB
-        const color = (red << 16) | (greenBlue << 8) | greenBlue;
-        b.setTint(color);
-      }
-    });
-  }
-
-  // Case Pad
-  fireShoot(scene, time) {
-    // Disparo (con enfriamiento)
-    if (time > this.lastFired + 350) {
-      const bullet = this.scene.bullets.create(
-        this.player.x,
-        this.player.y - 9,
-        "bullet"
-      );
-      bullet.setDepth(5).setScale(0.6);
-      bullet.body.setVelocityY(-300);
-      bullet.body.setCollideWorldBounds(false);
-      this.lastFired = time;
-    }
-
-    // Destruir balas que salen de pantalla
-    this.scene.bullets.children.each((b) => {
-      if (b.y < 0) {
-        b.destroy();
       } else {
         const ratio = Phaser.Math.Clamp(
           1 - b.y / this.scene.scale.height,

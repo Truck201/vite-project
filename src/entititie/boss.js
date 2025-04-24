@@ -383,6 +383,7 @@ function spawnCentralBoss(scene) {
 
 function shootCentralBeam(scene, boss) {
   const beam = scene.bossProjectiles.create(boss.x, boss.y + 10, "raySprite");
+  beam.play("raySpriteAnim", true);
   beam.setVelocityY(280);
   beam.setDepth(5);
   // beam.play("rayAnim");

@@ -97,6 +97,15 @@ export class MainMenu extends Scene {
     this.inputManager.update();
     const direction = this.inputManager.getMenuNavigation();
 
+    if (direction === "up") {
+      this.currentSelection =
+        (this.currentSelection - 1 + this.options.length) % this.options.length;
+      this.updateSelection();
+    } else if (direction === "down") {
+      this.currentSelection = (this.currentSelection + 1) % this.options.length;
+      this.updateSelection();
+    }
+
     // Default Configs
     // Navegación del menú con flechas
     if (Phaser.Input.Keyboard.JustDown(this.cursor.up)) {

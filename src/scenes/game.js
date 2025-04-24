@@ -63,7 +63,7 @@ export class Game extends Scene {
     this.inputManager.setup();
 
     // añadimos Player
-    this.player = new Player(this);
+    this.player = new Player(this, this.inputManager);
 
     // Hud
     this.scene.launch("hud", {
@@ -121,17 +121,14 @@ export class Game extends Scene {
 
     if (this.inputManager.pad) {
       this.player.playerMove(movement.x * 88); // joystick
-      if (isShooting) {
-        this.player.fireShoot(this, this.time.now);
-      }
     } else {
       this.player.playerMove(88); // teclado
     }
 
     // Config Default
     this.moveParallax();
-    this.player.playerMove(88);
     this.player.update();
+
     this.player.updateBullets(this, this.time.now);
 
     this.enemyManager.update();

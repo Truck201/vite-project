@@ -28,6 +28,12 @@ export class InputManager {
   update() {
     if (!this.pad) return;
 
+    if (!this.pad.connected) {
+      console.warn("🎮 Gamepad desconectado");
+      this.pad = null;
+      return;
+    }
+
     // Movimiento del stick izquierdo (ejes 0 y 1)
     const x = this.pad.axes.length > 0 ? this.pad.axes[0].getValue() : 0;
     const y = this.pad.axes.length > 1 ? this.pad.axes[1].getValue() : 0;
@@ -48,7 +54,17 @@ export class InputManager {
   }
 
   isShooting() {
-    return this.shootPressed;
+    if (!this.pad || !this.pad.buttons) return false;
+
+    const triggerThreshold = 0.5;
+    return (
+      this.pad.buttons[0].pressed || // A
+      this.pad.buttons[1].pressed || // B
+      this.pad.buttons[2].pressed || // X
+      this.pad.buttons[3].pressed || // Y
+      this.pad.buttons[6].value > triggerThreshold || // L2
+      this.pad.buttons[7].value > triggerThreshold // R2
+    );
   }
 
   // Para menús, devuelve "up" o "down" con antirebote
