@@ -126,6 +126,8 @@ export class addBonus {
   }
 
   muteBonus() {
-    this.scene.BonusIdle.stop();
+    if (this.scene.BonusIdle) {
+      this.scene.BonusIdle.stop();
+    }
   }
 }

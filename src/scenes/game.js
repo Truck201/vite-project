@@ -83,7 +83,7 @@ export class Game extends Scene {
     this.player.createBulletSystem(this);
 
     // Añadir bonus
-    this.time.addEvent({
+    this.addingBonus = this.time.addEvent({
       delay: Phaser.Math.Between(9000, 15000),
       loop: true,
       callback: () => {

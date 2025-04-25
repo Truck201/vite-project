@@ -147,8 +147,12 @@ export class Hud extends Scene {
       gameScene.BonusIdle.stop();
     }
 
-    if (gameScene.BonusIdle) {
-      gameScene.BonusIdle.stop();
+    if (gameScene.bonus) {
+      gameScene.bonus.muteBonus();
+    }
+
+    if (gameScene.addingBonus) {
+      gameScene.addingBonus.destroy();
     }
 
     if (gameScene.enemyManager.playAlienMoveSound) {
