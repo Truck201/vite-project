@@ -14,14 +14,21 @@ export class InputManager {
     if (pads.length > 0) {
       this.pad = pads[0];
       console.log("🎮 Gamepad ya conectado:", this.pad.id);
-      this.scene.add.text(10, 10, "Gamepad conectado!", { color: "#fff" });
+      this.showConnectionMessage();
     }
 
     // Escucha futuras conexiones
     this.scene.input.gamepad.once("connected", (pad) => {
       console.log("🎮 Gamepad conectado:", pad.id);
       this.pad = pad;
-      this.scene.add.text(10, 10, "Gamepad conectado!", { color: "#fff" });
+      this.showConnectionMessage();
+    });
+
+    this.scene.input.gamepad.on("disconnected", (pad) => {
+      if (this.pad && this.pad.id === pad.id) {
+        console.warn("🎮 Gamepad desconectado:", pad.id);
+        this.pad = null;
+      }
     });
   }
 
@@ -47,6 +54,21 @@ export class InputManager {
       this.pad.buttons[1].pressed || // B
       this.pad.buttons[2].pressed || // X
       this.pad.buttons[3].pressed; // Y
+  }
+
+  showConnectionMessage() {
+    // Crea el texto y ocúltalo después de 2 segundos
+    const message = this.scene.add.text(10, 10, "Gamepad conectado!", {
+      color: "#fff",
+    });
+
+    // Configura un temporizador para ocultar el mensaje
+    this.messageTimer = this.scene.time.addEvent({
+      delay: 2000, // 2 segundos
+      callback: () => {
+        message.destroy(); // Destruye el texto
+      },
+    });
   }
 
   getMovement() {

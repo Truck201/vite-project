@@ -50,7 +50,6 @@ export class Player {
       // moveX = gamepadMove.x;
       if (gamepadMove.x < 0) moveX = -1;
       else if (gamepadMove.x > 0) moveX = 1;
-      console.log(moveX);
     } else {
       // Fallback a teclado
       if (this.cursor.left.isDown) moveX = -1;
@@ -58,9 +57,6 @@ export class Player {
     }
 
     this.player.body.setVelocityX(moveX * finalSpeed);
-    let moveSpeed = finalSpeed * moveX;
-    console.log(`Total moveSpeed = ${moveSpeed}`);
-    console.log(`FinalSpeed = ${finalSpeed}, MoveX = ${moveX}`);
 
     // Animaciones
     if (moveX < -0.1 && this.currentDirection !== "left") {
