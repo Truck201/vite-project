@@ -73,7 +73,7 @@ export class InputManager {
 
     if (Math.abs(this.movement.y) > 0.5 && now - this.lastMenuMoveTime > 300) {
       this.lastMenuMoveTime = now;
-      return this.movement.y < 0 ? "up" : "down";
+      return this.movement < 0 ? "up" : "down";
     }
 
     return null;

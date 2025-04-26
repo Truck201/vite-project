@@ -258,11 +258,11 @@ export class EnemyManager {
         // Aplica daño al jugador
         if (this.scene.player.handlePlayerHit) {
           this.scene.player.handlePlayerHit.bind(this.scene.player); // o la cantidad de daño que desees
-        }
 
-        // Opcional: feedback visual o sonoro
-        this.scene.cameras.main.shake(150, 0.01); // sacudida
-        this.scene.sound.play("player_hit"); // sonido de golpe, si lo tienes
+          // Opcional: feedback visual o sonoro
+          this.scene.cameras.main.shake(150, 0.01); // sacudida
+          this.scene.sound.play("player_hit"); // sonido de golpe, si lo tienes
+        }
       }
     });
   }

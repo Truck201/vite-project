@@ -120,7 +120,7 @@ export class Game extends Scene {
     const isShooting = this.inputManager.isShooting();
 
     if (this.inputManager.pad) {
-      this.player.playerMove(movement.x * 88); // joystick
+      this.player.playerMove(88); // joystick movement.x *
     } else {
       this.player.playerMove(88); // teclado
     }
